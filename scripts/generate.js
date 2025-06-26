@@ -3,8 +3,7 @@ const Parser = require('rss-parser');
 const fs     = require('fs');
 const parser = new Parser();
 
-// Configuração dos feeds por categoria
-const categorias = {
+// Configuração dos feeds por categoria\ nconst categorias = {
   Brasil: [
     {nome:'NeoFeed',        url:'https://neofeed.com.br/feed/'},
     {nome:'Brazil Economy', url:'https://brazileconomy.com.br/feed/'},
@@ -35,7 +34,7 @@ const categorias = {
     hour:   '2-digit', minute:'2-digit', second:'2-digit'
   });
 
-  // Início do HTML
+  // Início do HTML sem thumbnails
   let html = `<!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -47,14 +46,11 @@ const categorias = {
     h1 { margin-bottom:.2em; }
     .last-updated { font-size:.9em; color:#555; margin-bottom:1.5em; }
     h2 { border-bottom:2px solid #eee; margin-top:25px; color:#333; }
-    .item { display: flex; align-items: flex-start; padding:10px 0; border-bottom:1px solid #f0f0f0; }
-    .thumb { flex-shrink:0; width:80px; height:60px; margin-right:10px; }
-    .thumb img { width:100%; height:100%; object-fit:cover; border-radius:4px; }
-    .content { flex-grow:1; }
-    .content strong { display:block; margin-bottom:4px; }
+    .item { padding:8px 0; border-bottom:1px solid #f0f0f0; }
+    .item strong { display:block; margin-bottom:4px; }
     a { color:#0066cc; text-decoration:none; }
     a:hover { text-decoration:underline; }
-    .time { font-size:12px; color:#999; margin-top:4px; }
+    .time { font-size:12px; color:#999; }
   </style>
 </head>
 <body>
@@ -62,10 +58,9 @@ const categorias = {
   <div class="last-updated">Atualizado em: ${lastUpdated}</div>
 `;
 
-  // Geração de cada seção
+  // Geração de cada seção sem exibir imagem
   for (let [cat, feeds] of Object.entries(categorias)) {
     html += `<h2>${cat}</h2>\n`;
-    // Coleta itens de todos os feeds
     const itens = [];
     for (let f of feeds) {
       try {
@@ -85,34 +80,26 @@ const categorias = {
             link: item.link,
             source: f.nome,
             dateObj,
-            hora,
-            // captura imagem do feed (enclosure ou media), sem fallback ainda
-            imgUrl: item.enclosure?.url || item['media:content']?.url || null
+            hora
           });
         });
       } catch(e) {
         console.warn(`Erro em ${f.nome}: ${e.message}`);
       }
     }
-    // Ordena do mais recente para o mais antigo
+    // Ordena pelos mais recentes
     itens.sort((a,b) => b.dateObj - a.dateObj);
-    // Renderiza
+    // Renderiza itens sem thumbnails
     itens.forEach(item => {
-      // Se não houver imagem no feed, usa placeholder com nome da fonte
-      const placeholder = `https://via.placeholder.com/80x60?text=${encodeURIComponent(item.source)}`;
-      const imgSrc = item.imgUrl || placeholder;
       html += `
     <div class="item">
-      <div class="thumb"><img src="${imgSrc}" alt="${item.source}" /></div>
-      <div class="content">
-        <strong><a href="${item.link}" target="_blank">${item.title}</a></strong>
-        <div class="time">${item.source} • ${item.hora}</div>
-      </div>
+      <strong><a href="${item.link}" target="_blank">${item.title}</a></strong>
+      <div class="time">${item.source} • ${item.hora}</div>
     </div>`;
     });
   }
 
-  // Fecha body e html
+  // Fecha HTML
   html += `\n</body></html>`;
   fs.writeFileSync('index.html', html, 'utf8');
 })();
