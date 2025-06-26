@@ -1,16 +1,27 @@
 name: Build RSS Aggregator
 
+# Permissão de escrita para commitar o index.html
+permissions:
+  contents: write
+
 on:
+  # Roda de hora em hora
   schedule:
-    - cron: '0 * * * *'      # roda de hora em hora
-  workflow_dispatch:         # permite disparo manual
+    - cron: '0 * * * *'
+  # Permite disparo manual no GitHub UI
+  workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout repo
         uses: actions/checkout@v3
+        with:
+          # mantém o token para permitir push e traz todo o histórico
+          persist-credentials: true
+          fetch-depth: 0
 
       - name: Setup Node.js
         uses: actions/setup-node@v3
@@ -23,15 +34,14 @@ jobs:
       - name: Generate index.html
         run: node scripts/generate.js
 
-      - name: Commit updated index.html
+      - name: Commit & Push updated index.html
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "actions@github.com"
-          git add index.html
-          git commit -m "🔄 Atualiza agregador" || echo "Sem mudanças"
-
-      - name: Push to main
-        uses: ad-m/github-push-action@v0.6.0
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          branch: main
+          if git diff --quiet; then
+            echo "No changes to commit"
+          else
+            git add index.html
+            git commit -m "🔄 Atualiza agregador"
+            git push origin HEAD:main
+          fi
