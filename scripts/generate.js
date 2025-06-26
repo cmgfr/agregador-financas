@@ -9,17 +9,17 @@ const categorias = {
     { nome: 'NeoFeed',        url: 'https://neofeed.com.br/feed/' },
     { nome: 'Brazil Economy', url: 'https://brazileconomy.com.br/feed/' },
     { nome: 'Brazil Journal', url: 'https://braziljournal.com/feed/' },
-    { nome: 'Valor Econômico',url: 'https://valor.globo.com/rss/' }
+    { nome: 'Valor Econômico',url: 'https://rss.app/feeds/iIpdo1Ttf4VtsGBB.xml' }
   ],
   "AI News": [
     { nome: 'Fallacy Alarm', url: 'https://www.fallacyalarm.com/feed' },
-    { nome: 'Julia DeLuca',  url: 'https://juliadeluca.substack.com/feed?format=rss' },
-    { nome: 'Trend Override', url: 'https://trendoverride.substack.com/feed?format=rss' }
+    { nome: 'Julia DeLuca',  url: 'https://rss.app/feeds/u2q3sf4cXoqnGfrm.xml' },
+    { nome: 'Trend Override', url: 'https://rss.app/feeds/OULIjpY8S0xQ0jJ2.xml' }
   ],
   World: [
     { nome: 'NY Times',       url: 'https://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml' },
-    { nome: 'Financial Times',url: 'https://www.ft.com/rss' },
-    { nome: 'ZeroHedge',      url: 'https://www.zerohedge.com/rss.xml' }
+    { nome: 'Financial Times',url: 'https://rss.app/feeds/axxm7AOhtn68kPsG.xml' },
+    { nome: 'ZeroHedge',      url: 'https://rss.app/feeds/AKf9c02Tid1aFlfy.xml' }
   ],
   Outros: [
     { nome: 'RSS App',        url: 'https://rss.app/feeds/lq2EsS022Si4i5V1.xml' }
