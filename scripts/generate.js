@@ -3,6 +3,7 @@ const Parser = require('rss-parser');
 const fs     = require('fs');
 const parser = new Parser();
 
+// Configuração dos feeds por categoria
 const categorias = {
   Brasil: [
     {nome:'NeoFeed',        url:'https://neofeed.com.br/feed/'},
@@ -26,7 +27,7 @@ const categorias = {
 };
 
 (async () => {
-  // Gera timestamp de última atualização
+  // Timestamp de geração no fuso de São Paulo
   const now = new Date();
   const lastUpdated = now.toLocaleString('pt-BR', {
     timeZone: 'America/Sao_Paulo',
@@ -34,7 +35,7 @@ const categorias = {
     hour:   '2-digit', minute:'2-digit', second:'2-digit'
   });
 
-  // Cabeçalho HTML
+  // Início do HTML
   let html = `<!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -61,9 +62,9 @@ const categorias = {
   <div class="last-updated">Atualizado em: ${lastUpdated}</div>
 `;
 
-  // Loop por categorias
+  // Geração de cada seção
   for (let [cat, feeds] of Object.entries(categorias)) {
-    html += `<h2>${cat}</h2>\n<div id=\"conteudo-${cat}\">`;
+    html += `<h2>${cat}</h2>\n`;
     // Coleta itens de todos os feeds
     const itens = [];
     for (let f of feeds) {
@@ -79,40 +80,39 @@ const categorias = {
                 hour: '2-digit', minute:'2-digit', second:'2-digit'
               })
             : '';
-          const imgUrl = item.enclosure?.url || item['media:content']?.url || '';
           itens.push({
             title: item.title,
             link: item.link,
             source: f.nome,
             dateObj,
             hora,
-            imgUrl
+            // captura imagem do feed (enclosure ou media), sem fallback ainda
+            imgUrl: item.enclosure?.url || item['media:content']?.url || null
           });
         });
       } catch(e) {
         console.warn(`Erro em ${f.nome}: ${e.message}`);
       }
     }
-    // Ordena pelos mais recentes primeiro
+    // Ordena do mais recente para o mais antigo
     itens.sort((a,b) => b.dateObj - a.dateObj);
     // Renderiza
     itens.forEach(item => {
-      const imgTag = item.imgUrl
-        ? `<div class=\"thumb\"><img src=\"${item.imgUrl}\" alt=\"\" /></div>`
-        : `<div class=\"thumb\"></div>`;
+      // Se não houver imagem no feed, usa placeholder com nome da fonte
+      const placeholder = `https://via.placeholder.com/80x60?text=${encodeURIComponent(item.source)}`;
+      const imgSrc = item.imgUrl || placeholder;
       html += `
-    <div class=\"item\">
-      ${imgTag}
-      <div class=\"content\">
-        <strong><a href=\"${item.link}\" target=\"_blank\">${item.title}</a></strong>
-        <div class=\"time\">${item.source} • ${item.hora}</div>
+    <div class="item">
+      <div class="thumb"><img src="${imgSrc}" alt="${item.source}" /></div>
+      <div class="content">
+        <strong><a href="${item.link}" target="_blank">${item.title}</a></strong>
+        <div class="time">${item.source} • ${item.hora}</div>
       </div>
     </div>`;
     });
-    html += `</div>`;
   }
 
-  // Fecha body
+  // Fecha body e html
   html += `\n</body></html>`;
   fs.writeFileSync('index.html', html, 'utf8');
 })();
