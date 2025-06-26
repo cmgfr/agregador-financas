@@ -3,25 +3,26 @@ const Parser = require('rss-parser');
 const fs     = require('fs');
 const parser = new Parser();
 
-// Configuração dos feeds por categoria\ nconst categorias = {
+// Configuração dos feeds por categoria
+const categorias = {
   Brasil: [
-    {nome:'NeoFeed',        url:'https://neofeed.com.br/feed/'},
-    {nome:'Brazil Economy', url:'https://brazileconomy.com.br/feed/'},
-    {nome:'Brazil Journal', url:'https://braziljournal.com/feed/'},
-    {nome:'Valor Econômico',url:'https://valor.globo.com/rss/'}
+    { nome: 'NeoFeed',        url: 'https://neofeed.com.br/feed/' },
+    { nome: 'Brazil Economy', url: 'https://brazileconomy.com.br/feed/' },
+    { nome: 'Brazil Journal', url: 'https://braziljournal.com/feed/' },
+    { nome: 'Valor Econômico',url: 'https://valor.globo.com/rss/' }
   ],
   "AI News": [
-    {nome:'Fallacy Alarm',  url:'https://www.fallacyalarm.com/feed'},
-    {nome:'Julia DeLuca',   url:'https://juliadeluca.substack.com/feed?format=rss'},
-    {nome:'Trend Override', url:'https://trendoverride.substack.com/feed?format=rss'}
+    { nome: 'Fallacy Alarm', url: 'https://www.fallacyalarm.com/feed' },
+    { nome: 'Julia DeLuca',  url: 'https://juliadeluca.substack.com/feed?format=rss' },
+    { nome: 'Trend Override', url: 'https://trendoverride.substack.com/feed?format=rss' }
   ],
   World: [
-    {nome:'NY Times',        url:'https://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml'},
-    {nome:'Financial Times', url:'https://www.ft.com/rss'},
-    {nome:'ZeroHedge',       url:'https://www.zerohedge.com/rss.xml'}
+    { nome: 'NY Times',       url: 'https://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml' },
+    { nome: 'Financial Times',url: 'https://www.ft.com/rss' },
+    { nome: 'ZeroHedge',      url: 'https://www.zerohedge.com/rss.xml' }
   ],
   Outros: [
-    {nome:'RSS App',         url:'https://rss.app/feeds/lq2EsS022Si4i5V1.xml'}
+    { nome: 'RSS App',        url: 'https://rss.app/feeds/lq2EsS022Si4i5V1.xml' }
   ]
 };
 
@@ -34,7 +35,7 @@ const parser = new Parser();
     hour:   '2-digit', minute:'2-digit', second:'2-digit'
   });
 
-  // Início do HTML sem thumbnails
+  // Cabeçalho HTML
   let html = `<!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -58,9 +59,10 @@ const parser = new Parser();
   <div class="last-updated">Atualizado em: ${lastUpdated}</div>
 `;
 
-  // Geração de cada seção sem exibir imagem
+  // Geração de cada seção sem exibir imagens
   for (let [cat, feeds] of Object.entries(categorias)) {
-    html += `<h2>${cat}</h2>\n`;
+    html += `
+  <h2>${cat}</h2>\n`;
     const itens = [];
     for (let f of feeds) {
       try {
@@ -87,9 +89,9 @@ const parser = new Parser();
         console.warn(`Erro em ${f.nome}: ${e.message}`);
       }
     }
-    // Ordena pelos mais recentes
+    // Ordena pelos mais recentes primeiro
     itens.sort((a,b) => b.dateObj - a.dateObj);
-    // Renderiza itens sem thumbnails
+    // Renderiza itens
     itens.forEach(item => {
       html += `
     <div class="item">
@@ -100,6 +102,8 @@ const parser = new Parser();
   }
 
   // Fecha HTML
-  html += `\n</body></html>`;
+  html += `
+</body>
+</html>`;
   fs.writeFileSync('index.html', html, 'utf8');
 })();
