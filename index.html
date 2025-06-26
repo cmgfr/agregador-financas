@@ -2,31 +2,31 @@
 <html lang="pt-br">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Agregador de Notícias</title>
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/rss-parser/dist/rss-parser.min.js"></script>
   <style>
-    body { font-family: Arial; margin: 0 auto; padding: 15px; max-width: 600px; }
-    h2 { border-bottom: 2px solid #eee; margin-top: 25px; color: #333; }
-    .item { padding: 10px 0; border-bottom: 1px solid #f0f0f0; }
-    a { text-decoration: none; color: #0066cc; }
-    a:hover { text-decoration: underline; }
-    .time { font-size: 12px; color: #999; }
+    body { font-family: Arial; margin: 0 auto; padding:15px; max-width:600px; }
+    h2 { border-bottom:2px solid #eee; margin-top:25px; color:#333; }
+    .item { padding:10px 0; border-bottom:1px solid #f0f0f0; }
+    a { text-decoration:none; color:#0066cc; }
+    a:hover { text-decoration:underline; }
+    .time { font-size:12px; color:#999; }
   </style>
 </head>
 <body>
   <h1>📰 Agregador de Notícias</h1>
   <div id="conteudo"></div>
   <script>
-    const CORS = "https://api.allorigins.win/get?url=";
+    const CORS = "https://api.allorigins.win/raw?url=";
     const parser = new RSSParser();
     const categorias = {
       "Brasil": [
-        { nome: 'NeoFeed',        url: 'https://neofeed.com.br/feed/' },
-        { nome: 'Brazil Economy', url: 'https://brazileconomy.com.br/feed/' },
-        { nome: 'Brazil Journal',  url: 'https://braziljournal.com/feed/' },
-        { nome: 'Valor Econômico',url: 'https://valor.globo.com/rss/' }
+        { nome: 'NeoFeed',         url: 'https://neofeed.com.br/feed/' },
+        { nome: 'Brazil Economy',  url: 'https://brazileconomy.com.br/feed/' },
+        { nome: 'Brazil Journal',   url: 'https://braziljournal.com/feed/' },
+        { nome: 'Valor Econômico', url: 'https://valor.globo.com/rss/' }
       ],
       "AI News": [
         { nome: 'Fallacy Alarm',  url: 'https://www.fallacyalarm.com/feed' },
@@ -34,12 +34,12 @@
         { nome: 'Trend Override',  url: 'https://trendoverride.substack.com/feed?format=rss' }
       ],
       "World": [
-        { nome: 'NY Times',        url: 'https://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml' },
-        { nome: 'Financial Times', url: 'https://www.ft.com/?format=rss' },
-        { nome: 'ZeroHedge',       url: 'https://cms.zerohedge.com/fullrss2.xml' }
+        { nome: 'NY Times',       url: 'https://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml' },
+        { nome: 'Financial Times',url: 'https://www.ft.com/rss' },
+        { nome: 'ZeroHedge',      url: 'https://www.zerohedge.com/rss.xml' }
       ],
       "Outros": [
-        { nome: 'Twitter',         url: 'https://rss.app/feeds/lq2EsS022Si4i5V1.xml' }
+        { nome: 'Twitter',        url: 'https://rss.app/feeds/lq2EsS022Si4i5V1.xml' }
       ]
     };
 
@@ -47,11 +47,12 @@
       $('#conteudo').append(`<h2>${categoria}</h2>`);
       for (let f of feeds) {
         try {
-          const resp = await $.getJSON(CORS + encodeURIComponent(f.url));
-          parser.parseString(resp.contents, (err, data) => {
-            if (err) return console.error(err);
+          const resposta = await fetch(CORS + encodeURIComponent(f.url));
+          const xmlText  = await resposta.text();
+          parser.parseString(xmlText, (err, data) => {
+            if (err) return console.warn(`Parse erro em ${f.nome}`, err);
             data.items.slice(0,3).forEach(item => {
-              const hora = new Date(item.pubDate).toLocaleString();
+              const hora = item.pubDate ? new Date(item.pubDate).toLocaleString() : '';
               $('#conteudo').append(`
                 <div class="item">
                   <strong><a href="${item.link}" target="_blank">${item.title}</a></strong>
