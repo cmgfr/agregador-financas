@@ -3,6 +3,7 @@ const Parser = require('rss-parser');
 const fs     = require('fs');
 const parser = new Parser();
 
+// Definição das categorias e seus feeds
 const categorias = {
   Brasil: [
     {nome:'NeoFeed',        url:'https://neofeed.com.br/feed/'},
@@ -21,22 +22,29 @@ const categorias = {
     {nome:'ZeroHedge',       url:'https://www.zerohedge.com/rss.xml'}
   ],
   Outros: [
-    {nome:'Twitter: JH',         url:'https://rss.app/feeds/lq2EsS022Si4i5V1.xml'}
+    {nome:'RSS App',         url:'https://rss.app/feeds/lq2EsS022Si4i5V1.xml'}
   ]
 };
 
 (async () => {
-  // 1) Calcula timestamp de geração
+  // Gera timestamp de última atualização em horário de São Paulo
   const now = new Date();
   const lastUpdated = now.toLocaleString('pt-BR', {
-    day:   '2-digit', month: '2-digit', year: 'numeric',
-    hour:  '2-digit', minute: '2-digit', second: '2-digit'
+    timeZone: 'America/Sao_Paulo',
+    day:    '2-digit',
+    month:  '2-digit',
+    year:   'numeric',
+    hour:   '2-digit',
+    minute: '2-digit',
+    second: '2-digit'
   });
 
-  // 2) Cabeçalho HTML com timestamp
+  // Cabeçalho HTML
   let html = `<!DOCTYPE html>
-<html lang="pt-br"><head>
-  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Agregador de Notícias</title>
   <style>
     body { font-family: Arial; margin:0 auto; padding:15px; max-width:600px; }
@@ -50,29 +58,39 @@ const categorias = {
     a:hover { text-decoration:underline; }
     .time { font-size:12px; color:#999; margin-top:4px; }
   </style>
-</head><body>
+</head>
+<body>
   <h1>📰 Agregador de Notícias</h1>
   <div class="last-updated">Atualizado em: ${lastUpdated}</div>
   <div id="conteudo">
 `;
 
-  // 3) Para cada categoria e feed, busca e renderiza até 3 itens com imagem
+  // Loop por categorias e feeds
   for (let [cat, feeds] of Object.entries(categorias)) {
     html += `<h2>${cat}</h2>\n`;
     for (let f of feeds) {
       try {
         const feed = await parser.parseURL(f.url);
         feed.items.slice(0,3).forEach(item => {
-          const hora = item.pubDate
-            ? new Date(item.pubDate).toLocaleString('pt-BR')
+          // Usa isoDate ou pubDate como fallback
+          const dataRaw = item.isoDate || item.pubDate;
+          const hora = dataRaw
+            ? new Date(dataRaw).toLocaleString('pt-BR', {
+                timeZone: 'America/Sao_Paulo',
+                day:    '2-digit',
+                month:  '2-digit',
+                year:   'numeric',
+                hour:   '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+              })
             : '';
-          // tenta obter imagem do RSS (enclosure ou media:content)
-          const imgUrl = item.enclosure?.url 
-                        || (item['media:content']?.url) 
-                        || null;
+          // Tenta obter imagem (enclosure ou media:content)
+          const imgUrl = item.enclosure?.url || item['media:content']?.url || '';
           const imgTag = imgUrl
             ? `<div class="thumb"><img src="${imgUrl}" alt="" /></div>`
             : '';
+
           html += `
     <div class="item">
       ${imgTag}
@@ -86,7 +104,7 @@ const categorias = {
     }
   }
 
-  // 4) Fecha tags e grava arquivo
+  // Fecha HTML e grava arquivo
   html += `</div></body></html>`;
   fs.writeFileSync('index.html', html, 'utf8');
 })();
