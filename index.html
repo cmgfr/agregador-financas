@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agregador de Notícias</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/rss-parser/dist/rss-parser.min.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0 auto; padding: 15px; max-width: 600px; }
+        h2 { border-bottom: 2px solid #eee; margin-top: 25px; color: #333; }
+        .item { padding: 10px 0; border-bottom: 1px solid #f0f0f0; }
+        a { text-decoration: none; color: #0066cc; }
+        a:hover { text-decoration: underline; }
+        .time { font-size: 12px; color: #999; }
+    </style>
+</head>
+<body>
+
+<h1>📰 Agregador de Notícias</h1>
+
+<div id="conteudo"></div>
+
+<script>
+const CORS_PROXY = "https://api.allorigins.win/get?url=";
+const parser = new RSSParser();
+
+const categorias = {
+    "Brasil": [
+        {nome: 'NeoFeed', url: 'https://neofeed.com.br/feed/'},
+        {nome: 'Brazil Economy', url: 'https://brazileconomy.com.br/feed/'},
+        {nome: 'Brazil Journal', url: 'http://braziljournal.com/rss'},
+        {nome: 'Valor Econômico', url: 'http://www.valor.com.br/rss'}
+    ],
+    "AI News": [
+        {nome: 'Fallacy Alarm', url: 'https://www.fallacyalarm.com/feed'},
+        {nome: 'Julia DeLuca', url: 'https://juliadeluca.substack.com/feed'},
+        {nome: 'Trend Override', url: 'https://trendoverride.substack.com/feed'}
+    ],
+    "World": [
+        {nome: 'NY Times', url: 'https://www.nytimes.com/rss'},
+        {nome: 'Financial Times', url: 'https://www.ft.com/news-feed'},
+        {nome: 'ZeroHedge', url: 'https://cms.zerohedge.com/fullrss2.xml'}
+    ],
+    "Outros": [
+        {nome: 'RSS App', url: 'https://rss.app/feeds/lq2EsS022Si4i5V1.xml'}
+    ]
+};
+
+async function carregarFeed(categoria, feeds) {
+    $("#conteudo").append(`<h2>${categoria}</h2>`);
+    for (let feed of feeds) {
+        await $.getJSON(CORS_PROXY + encodeURIComponent(feed.url), function(data) {
+            parser.parseString(data.contents, (err, feedData) => {
+                if (err) { console.error(err); return; }
+                feedData.items.slice(0, 3).forEach(item => {
+                    let pubDate = new Date(item.pubDate).toLocaleString();
+                    $('#conteudo').append(`
+                        <div class="item">
+                            <div><strong><a href="${item.link}" target="_blank">${item.title}</a></strong></div>
+                            <div class="time">${feed.nome} • ${pubDate}</div>
+                        </div>`);
+                });
+            });
+        });
+    }
+}
+
+async function carregarTudo() {
+    for (let categoria in categorias) {
+        await carregarFeed(categoria, categorias[categoria]);
+    }
+}
+
+$(document).ready(carregarTudo);
+</script>
+
+</body>
+</html>
