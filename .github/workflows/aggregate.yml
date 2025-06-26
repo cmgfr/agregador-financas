@@ -1,0 +1,38 @@
+name: Build RSS Aggregator
+
+on:
+  schedule:
+    - cron: '0 * * * *'      # roda de hora em hora; ajuste se quiser
+  workflow_dispatch:         # permite disparar manualmente via Actions
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        run: npm install rss-parser
+
+      - name: Generate index.html
+        run: node scripts/generate.js
+
+      - name: Commit updated index.html
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "actions@github.com"
+          git add index.html
+          git commit -m "🔄 Atualiza agregador" || echo "Sem mudanças"
+
+      - name: Push to main
+        uses: ad-m/github-push-action@v0.6.0
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: main
