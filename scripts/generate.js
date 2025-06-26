@@ -21,7 +21,7 @@ const categorias = {
     {nome:'ZeroHedge',       url:'https://www.zerohedge.com/rss.xml'}
   ],
   Outros: [
-    {nome:'RSS App',         url:'https://rss.app/feeds/lq2EsS022Si4i5V1.xml'}
+    {nome:'X-JH',         url:'https://rss.app/feeds/lq2EsS022Si4i5V1.xml'}
   ]
 };
 
