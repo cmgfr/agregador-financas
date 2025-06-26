@@ -2,13 +2,12 @@ name: Build RSS Aggregator
 
 on:
   schedule:
-    - cron: '0 * * * *'      # roda de hora em hora; ajuste se quiser
-  workflow_dispatch:         # permite disparar manualmente via Actions
+    - cron: '0 * * * *'      # roda de hora em hora
+  workflow_dispatch:         # permite disparo manual
 
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout repo
         uses: actions/checkout@v3
@@ -19,7 +18,7 @@ jobs:
           node-version: '18'
 
       - name: Install dependencies
-        run: npm install rss-parser
+        run: npm install
 
       - name: Generate index.html
         run: node scripts/generate.js
