@@ -20,9 +20,6 @@ const categorias = {
     { nome: 'Fallacy Alarm', url: 'https://www.fallacyalarm.com/feed' },
     { nome: 'Julia DeLuca',  url: 'https://rss.app/feeds/u2q3sf4cXoqnGfrm.xml' },
     { nome: 'Trend Override', url: 'https://rss.app/feeds/OULIjpY8S0xQ0jJ2.xml' }
-  ],
-  Outros: [
-    { nome: 'Twitter',        url: 'https://rss.app/feeds/lq2EsS022Si4i5V1.xml' }
   ]
 };
 
